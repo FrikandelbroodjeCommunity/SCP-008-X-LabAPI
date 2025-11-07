@@ -1,11 +1,9 @@
-﻿using RemoteAdmin;
-using CommandSystem;
+﻿using CommandSystem;
 using System;
-using Exiled.API.Features;
-using UnityEngine;
-using Exiled.Permissions.Extensions;
+using LabApi.Features.Console;
+using LabApi.Features.Permissions;
+using LabApi.Features.Wrappers;
 using SCP008X.Components;
-using MEC;
 
 namespace SCP008X.Commands
 {
@@ -20,22 +18,25 @@ namespace SCP008X.Commands
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!((CommandSender)sender).CheckPermission("scp008.infect"))
+            if (!sender.HasPermissions("scp008.infect"))
             {
                 response = "Missing permissions.";
                 return false;
             }
-            Player ply = Player.Get(arguments.At(0));
+
+            var ply = Player.Get(arguments.At(0));
             if (ply == null)
             {
                 response = "Invalid player.";
                 return false;
             }
-            if(!ply.ReferenceHub.TryGetComponent(out SCP008 scp008))
+
+            if (!ply.ReferenceHub.TryGetComponent(out Scp008 scp008))
             {
                 response = "This player is not infected.";
                 return false;
             }
+
             try
             {
                 UnityEngine.Object.Destroy(scp008);
@@ -44,9 +45,9 @@ namespace SCP008X.Commands
             }
             catch (Exception e)
             {
-                Log.Debug($"Failed to destroy SCP008 component! {e}", SCP008X.Instance.Config.DebugMode);
-                response = $"Failed to cure {ply.Nickname}. Please contact DGvagabond for support.";
-                throw;
+                Logger.Debug($"Failed to destroy SCP008 component! {e}", Scp008X.Singleton.Config.DebugMode);
+                response = $"Failed to cure {ply.Nickname}.";
+                return false;
             }
         }
     }
