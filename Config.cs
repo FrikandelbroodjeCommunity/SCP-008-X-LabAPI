@@ -10,7 +10,10 @@ namespace SCP008X
         [Description("Display plugins stats at the end of the round?")]
         public bool SummaryStats { get; set; }
 
+        [Description("The chance of a player being infected when hit by a zombie.")]
         public int InfectionChance { get; set; } = 100;
+        
+        [Description("The chance a player cures themselves when using a medkit.")]
         public int CureChance { get; set; } = 50;
 
         [Description("Toggle players getting infected via area of effect")]
@@ -25,12 +28,14 @@ namespace SCP008X
         [Description("Allow SCP-049 to instantly revive targets?")]
         public bool BuffDoctor { get; set; } = false;
 
-        public int ZombieHealth { get; set; } = 300;
+        [Description("Health given to the zombie when they spawn in.")]
+        public int ZombieHealth { get; set; } = 320;
 
         [Description("How much AHP should be given to Zombies?")]
-        public int Scp008Buff { get; set; } = 10;
+        public int Scp008Buff { get; set; } = 25;
 
-        public int MaxAhp { get; set; } = 100;
+        [Description("Maximum AHP that a zombie can get by damaging other players. This is on top of HS they can get from 049.")]
+        public int MaxAhp { get; set; } = 50;
 
         [Description("Whether to have CASSIE announce a message at the start of the round")]
         public bool CassieAnnounce { get; set; } = true;

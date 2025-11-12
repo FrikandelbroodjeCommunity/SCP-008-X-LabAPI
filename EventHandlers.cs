@@ -28,7 +28,8 @@ namespace SCP008X
             PlayerEvents.Hurting += OnPlayerHurting;
             PlayerEvents.Hurt += OnPlayerHurt;
             PlayerEvents.UsedItem += OnHealed;
-            PlayerEvents.ChangedRole += OnRoleChange;
+            PlayerEvents.ChangingRole += OnRoleChange;
+            PlayerEvents.ChangedRole += OnRoleChanged;
             PlayerEvents.Death += OnPlayerDied;
 
             Scp049Events.ResurrectingBody += OnReviving;
@@ -44,7 +45,8 @@ namespace SCP008X
             PlayerEvents.Hurting -= OnPlayerHurting;
             PlayerEvents.Hurt -= OnPlayerHurt;
             PlayerEvents.UsedItem -= OnHealed;
-            PlayerEvents.ChangedRole -= OnRoleChange;
+            PlayerEvents.ChangingRole -= OnRoleChange;
+            PlayerEvents.ChangedRole -= OnRoleChanged;
             PlayerEvents.Death -= OnPlayerDied;
 
             Scp049Events.ResurrectingBody -= OnReviving;
@@ -86,7 +88,7 @@ namespace SCP008X
 
         private static void OnPlayerLeave(PlayerLeftEventArgs ev)
         {
-            if (ev.Player.Role == RoleTypeId.Scp0492 && ev.Player.ReferenceHub.TryGetComponent(out Scp008 s008))
+            if (ev.Player.Role == RoleTypeId.Scp0492 && ev.Player.GameObject.TryGetComponent(out Scp008 s008))
             {
                 Scp008Handler.ClearScp008(ev.Player);
             }
@@ -95,8 +97,7 @@ namespace SCP008X
         private static void OnPlayerHurting(PlayerHurtingEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.Role != RoleTypeId.Scp0492 || ev.Player == ev.Attacker) return;
-
-            if (ev.DamageHandler is not UniversalDamageHandler handler) return;
+            if (ev.DamageHandler is not StandardDamageHandler handler) return;
 
             if (Config.ZombieDamage >= 0)
             {
@@ -104,13 +105,13 @@ namespace SCP008X
                 Logger.Debug($"Damage overriden to be {handler.Damage}.", Config.DebugMode);
             }
 
-            if (Config.Scp008Buff >= 0)
+            if (Config.Scp008Buff >= 0 && ev.Attacker.GameObject.TryGetComponent(out Scp008 scp008))
             {
-                ev.Attacker.ArtificialHealth += Config.Scp008Buff;
+                scp008.CurAhp += Config.Scp008Buff;
                 Logger.Debug($"Added {Config.Scp008Buff} AHP to {ev.Attacker.LogName}.", Config.DebugMode);
             }
 
-            if (Gen.Next(1, 100) > Config.InfectionChance || ev.Player.Faction == Faction.SCP) return;
+            if (Gen.Next(0, 100) >= Config.InfectionChance || ev.Player.Faction == Faction.SCP) return;
             try
             {
                 Scp008Handler.Infect(ev.Player);
@@ -133,9 +134,7 @@ namespace SCP008X
 
         private static void OnHealed(PlayerUsedItemEventArgs ev)
         {
-            if (ev.UsableItem.Category != ItemCategory.Medical) return;
-
-            if (ev.Player.ReferenceHub.TryGetComponent(out Scp008 scp008))
+            if (ev.Player.GameObject.TryGetComponent(out Scp008 scp008))
             {
                 switch (ev.UsableItem.Type)
                 {
@@ -144,7 +143,7 @@ namespace SCP008X
                         Logger.Debug($"{ev.Player.LogName} successfully cured themselves.", Config.DebugMode);
                         break;
                     case ItemType.Medkit:
-                        if (Gen.Next(1, 100) <= Config.CureChance)
+                        if (Gen.Next(0, 100) < Config.CureChance)
                         {
                             UnityEngine.Object.Destroy(scp008);
                             Logger.Debug($"{ev.Player.LogName} cured themselves with a medkit.", Config.DebugMode);
@@ -155,24 +154,34 @@ namespace SCP008X
             }
         }
 
-        private static void OnRoleChange(PlayerChangedRoleEventArgs ev)
+        private static void OnRoleChange(PlayerChangingRoleEventArgs ev)
+        {
+            // Was not a zombie yet, but does have the SCP008 component, so is infected
+            if (ev.OldRole.RoleTypeId != RoleTypeId.Scp0492 && ev.Player.GameObject.TryGetComponent(out Scp008 _))
+            {
+                ev.NewRole = RoleTypeId.Scp0492;
+            }
+
+            if (ev.NewRole == RoleTypeId.Scp0492)
+            {
+                Logger.Debug($"Calling Turn() method for {ev.Player.LogName}.", Config.DebugMode);
+                Timing.CallDelayed(0.1f, () => // Small delay so the player is already the zombie when this happens
+                {
+                    Scp008Handler.Turn(ev.Player);
+                });
+            }
+            else
+            {
+                Scp008Handler.ClearScp008(ev.Player);
+                Logger.Debug($"Called ClearSCP008() method for {ev.Player.LogName}.", Config.DebugMode);
+            }
+        }
+
+        private static void OnRoleChanged(PlayerChangedRoleEventArgs ev)
         {
             foreach (var instance in Scp008.Instances)
             {
                 instance.WhenRoleChange(ev);
-            }
-
-            if (ev.NewRole.RoleTypeId == RoleTypeId.Scp0492)
-            {
-                Logger.Debug($"Calling Turn() method for {ev.Player.LogName}.", Config.DebugMode);
-                Scp008Handler.Turn(ev.Player);
-            }
-
-            if (ev.NewRole.RoleTypeId != RoleTypeId.Scp0492 || ev.NewRole.RoleTypeId != RoleTypeId.Scp096)
-            {
-                Scp008Handler.ClearScp008(ev.Player);
-                ev.Player.ArtificialHealth = 0; // TODO: Is this really necessary?!
-                Logger.Debug($"Called ClearSCP008() method for {ev.Player.LogName}.", Config.DebugMode);
             }
         }
 
@@ -191,9 +200,9 @@ namespace SCP008X
                 ev.Target.SendBroadcast(Config.SuicideBroadcast, 10);
             }
 
-            if (Config.Scp008Buff >= 0)
+            if (Config.Scp008Buff >= 0 && ev.Player.GameObject.TryGetComponent(out Scp008 comp))
             {
-                ev.Target.ArtificialHealth += Config.Scp008Buff;
+                comp.CurAhp += Config.Scp008Buff;
                 Logger.Debug($"Added {Config.Scp008Buff} AHP to {ev.Target.LogName}.", Config.DebugMode);
             }
 
@@ -210,7 +219,7 @@ namespace SCP008X
                 Logger.Debug($"Called ClearSCP008() method for {ev.Player.LogName}.", Config.DebugMode);
             }
 
-            if (ev.Player.ReferenceHub.TryGetComponent(out Scp008 _))
+            if (ev.Player.GameObject.TryGetComponent(out Scp008 _))
             {
                 ev.Player.SetRole(RoleTypeId.Scp0492, RoleChangeReason.Resurrected);
             }

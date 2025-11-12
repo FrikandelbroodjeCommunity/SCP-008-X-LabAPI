@@ -17,13 +17,13 @@ namespace SCP008X
 
         public static void ClearScp008(Player player)
         {
-            if (player.ReferenceHub.TryGetComponent(out Scp008 scp008))
+            if (player.GameObject.TryGetComponent(out Scp008 scp008))
                 UnityEngine.Object.Destroy(scp008);
         }
 
         public static void Infect(Player target)
         {
-            if (target.ReferenceHub.gameObject.TryGetComponent(out Scp008 scp008))
+            if (target.GameObject.TryGetComponent(out Scp008 _))
             {
                 return;
             }
@@ -35,9 +35,9 @@ namespace SCP008X
         public static void Turn(Player target)
         {
             Victims++;
-            if (!target.ReferenceHub.TryGetComponent(out Scp008 _))
+            if (!target.GameObject.TryGetComponent(out Scp008 comp))
             {
-                target.ReferenceHub.gameObject.AddComponent<Scp008>();
+                comp = target.ReferenceHub.gameObject.AddComponent<Scp008>();
             }
 
             if (target.HasEffect<Scp207>())
@@ -62,7 +62,7 @@ namespace SCP008X
 
             if (Config.Scp008Buff >= 0)
             {
-                target.ArtificialHealth += Config.Scp008Buff;
+                comp.CurAhp = Config.Scp008Buff;
             }
 
             target.Health = Config.ZombieHealth;
@@ -78,7 +78,7 @@ namespace SCP008X
             var check = 0;
             foreach (var ply in Player.List)
             {
-                if (ply.ReferenceHub.gameObject.TryGetComponent(out Scp008 _))
+                if (ply.GameObject.TryGetComponent(out Scp008 _))
                 {
                     check++;
                 }
@@ -98,7 +98,7 @@ namespace SCP008X
             foreach (var ply in Player.List.Where(x =>
                          x != player && x.CachedRoom == player.CachedRoom && x.Faction != Faction.SCP))
             {
-                if (Gen.Next(1, 100) <= Config.AoeChance)
+                if (Gen.Next(0, 100) < Config.AoeChance)
                 {
                     Infect(ply);
                     Logger.Debug($"Called Infect() method for {ply.LogName} due to AOE.", Config.DebugMode);
