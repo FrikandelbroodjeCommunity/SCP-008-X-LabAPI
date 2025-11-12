@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using FrikanUtils.Utilities;
 using LabApi.Events.Arguments.PlayerEvents;
 using LabApi.Events.Arguments.Scp049Events;
 using LabApi.Events.Arguments.ServerEvents;
@@ -19,6 +20,8 @@ namespace SCP008X
         private static Config Config => Scp008X.Singleton.Config;
         private static readonly Random Gen = new();
 
+        private static readonly List<ushort> Scp008ItemIds = new();
+
         public static void RegisterEvents()
         {
             ServerEvents.RoundStarted += OnRoundStart;
@@ -31,6 +34,7 @@ namespace SCP008X
             PlayerEvents.ChangingRole += OnRoleChange;
             PlayerEvents.ChangedRole += OnRoleChanged;
             PlayerEvents.Death += OnPlayerDied;
+            PlayerEvents.PickedUpItem += PickedUpItem;
 
             Scp049Events.ResurrectingBody += OnReviving;
             Scp049Events.ResurrectedBody += OnRevived;
@@ -48,6 +52,7 @@ namespace SCP008X
             PlayerEvents.ChangingRole -= OnRoleChange;
             PlayerEvents.ChangedRole -= OnRoleChanged;
             PlayerEvents.Death -= OnPlayerDied;
+            PlayerEvents.PickedUpItem -= PickedUpItem;
 
             Scp049Events.ResurrectingBody -= OnReviving;
             Scp049Events.ResurrectedBody -= OnRevived;
@@ -66,6 +71,24 @@ namespace SCP008X
                     else
                     {
                         Cassie.Message(Config.Announcement, customSubtitles: Config.AnnouncementSubtitles);
+                    }
+
+                    Scp008ItemIds.Clear();
+
+                    // Determine if we should add an SCP-008 item
+                    if (Player.List.Any(x => x.Role == RoleTypeId.Scp049 || x.Role == RoleTypeId.Scp0492))
+                    {
+                        return;
+                    }
+
+                    var allItems = Item.List
+                        .Where(x => x.Category != ItemCategory.SpecialWeapon)
+                        .Select(x => x.Serial)
+                        .ToList();
+
+                    for (var i = 0; i < Config.InfectedItems; i++)
+                    {
+                        Scp008ItemIds.Add(allItems.PullRandomItem());
                     }
                 });
             }
@@ -253,6 +276,27 @@ namespace SCP008X
             {
                 Scp008Handler.AoeInfection(ev.Player);
             }
+        }
+
+        private static void PickedUpItem(PlayerPickedUpItemEventArgs ev)
+        {
+            if (Scp008ItemIds.Contains(ev.Item.Serial))
+            {
+                return;
+            }
+
+            Scp008ItemIds.Remove(ev.Item.Serial);
+
+            Timing.CallDelayed(1f, () =>
+            {
+                if (ev.Player.GameObject.TryGetComponent(out Scp008 _))
+                {
+                    return;
+                }
+
+                ev.Player.ReferenceHub.gameObject.AddComponent<Scp008>();
+                ev.Player.SendHint($"<color=yellow><b>SCP-008</b></color>\n{Config.InfectedHint}", 10f);
+            });
         }
     }
 }

@@ -12,7 +12,7 @@ namespace SCP008X
 
         [Description("The chance of a player being infected when hit by a zombie.")]
         public int InfectionChance { get; set; } = 100;
-        
+
         [Description("The chance a player cures themselves when using a medkit.")]
         public int CureChance { get; set; } = 50;
 
@@ -34,7 +34,8 @@ namespace SCP008X
         [Description("How much AHP should be given to Zombies?")]
         public int Scp008Buff { get; set; } = 25;
 
-        [Description("Maximum AHP that a zombie can get by damaging other players. This is on top of HS they can get from 049.")]
+        [Description(
+            "Maximum AHP that a zombie can get by damaging other players. This is on top of HS they can get from 049.")]
         public int MaxAhp { get; set; } = 50;
 
         [Description("Whether to have CASSIE announce a message at the start of the round")]
@@ -61,5 +62,11 @@ namespace SCP008X
 
         [Description("Should players keep their inventory after turning into a zombie? Items cannot be used by them.")]
         public bool RetainInventory { get; set; } = true;
+
+        [Description("The amount of infected items to spawn if there is no 049.")]
+        public int InfectedItems { get; set; } = 1;
+
+        [Description("Hint displayed when infected by an item.")]
+        public string InfectedHint { get; set; } = "You picked up an item infected with SCP-008!";
     }
 }
