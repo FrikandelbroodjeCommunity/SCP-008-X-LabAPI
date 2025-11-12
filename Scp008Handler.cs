@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CustomPlayerEffects;
-using Discord;
 using LabApi.Features.Console;
 using LabApi.Features.Wrappers;
 using PlayerRoles;

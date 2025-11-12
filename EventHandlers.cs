@@ -25,9 +25,11 @@ namespace SCP008X
             ServerEvents.RoundEnded += OnRoundEnd;
 
             PlayerEvents.Left += OnPlayerLeave;
-            PlayerEvents.Hurting += OnPlayerHurt;
+            PlayerEvents.Hurting += OnPlayerHurting;
+            PlayerEvents.Hurt += OnPlayerHurt;
             PlayerEvents.UsedItem += OnHealed;
-            PlayerEvents.ChangingRole += OnRoleChange;
+            PlayerEvents.ChangedRole += OnRoleChange;
+            PlayerEvents.Death += OnPlayerDied;
 
             Scp049Events.ResurrectingBody += OnReviving;
             Scp049Events.ResurrectedBody += OnRevived;
@@ -35,6 +37,18 @@ namespace SCP008X
 
         public static void UnregisterEvents()
         {
+            ServerEvents.RoundStarted -= OnRoundStart;
+            ServerEvents.RoundEnded -= OnRoundEnd;
+
+            PlayerEvents.Left -= OnPlayerLeave;
+            PlayerEvents.Hurting -= OnPlayerHurting;
+            PlayerEvents.Hurt -= OnPlayerHurt;
+            PlayerEvents.UsedItem -= OnHealed;
+            PlayerEvents.ChangedRole -= OnRoleChange;
+            PlayerEvents.Death -= OnPlayerDied;
+
+            Scp049Events.ResurrectingBody -= OnReviving;
+            Scp049Events.ResurrectedBody -= OnRevived;
         }
 
         private static void OnRoundStart()
@@ -78,7 +92,7 @@ namespace SCP008X
             }
         }
 
-        private static void OnPlayerHurt(PlayerHurtingEventArgs ev)
+        private static void OnPlayerHurting(PlayerHurtingEventArgs ev)
         {
             if (ev.Attacker == null || ev.Attacker.Role != RoleTypeId.Scp0492 || ev.Player == ev.Attacker) return;
 
@@ -109,6 +123,14 @@ namespace SCP008X
             }
         }
 
+        private static void OnPlayerHurt(PlayerHurtEventArgs ev)
+        {
+            foreach (var instance in Scp008.Instances)
+            {
+                instance.WhenHurt(ev);
+            }
+        }
+
         private static void OnHealed(PlayerUsedItemEventArgs ev)
         {
             if (ev.UsableItem.Category != ItemCategory.Medical) return;
@@ -133,15 +155,20 @@ namespace SCP008X
             }
         }
 
-        private static void OnRoleChange(PlayerChangingRoleEventArgs ev)
+        private static void OnRoleChange(PlayerChangedRoleEventArgs ev)
         {
-            if (ev.NewRole == RoleTypeId.Scp0492)
+            foreach (var instance in Scp008.Instances)
+            {
+                instance.WhenRoleChange(ev);
+            }
+
+            if (ev.NewRole.RoleTypeId == RoleTypeId.Scp0492)
             {
                 Logger.Debug($"Calling Turn() method for {ev.Player.LogName}.", Config.DebugMode);
                 Scp008Handler.Turn(ev.Player);
             }
 
-            if (ev.NewRole != RoleTypeId.Scp0492 || ev.NewRole != RoleTypeId.Scp096)
+            if (ev.NewRole.RoleTypeId != RoleTypeId.Scp0492 || ev.NewRole.RoleTypeId != RoleTypeId.Scp096)
             {
                 Scp008Handler.ClearScp008(ev.Player);
                 ev.Player.ArtificialHealth = 0; // TODO: Is this really necessary?!

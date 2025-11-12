@@ -12,30 +12,31 @@ namespace SCP008X.Components
 {
     public class Scp008 : MonoBehaviour
     {
+        internal static readonly List<Scp008> Instances = new();
+        
         private float _curAhp;
         private Player _ply;
         private CoroutineHandle _ahp;
         private CoroutineHandle _s008;
 
         private static Config Config => Scp008X.Singleton.Config;
-
-        public void Awake()
+        
+        private void Awake()
         {
             _ply = Player.Get(gameObject);
             _ahp = Timing.RunCoroutine(RetainAHP());
             _s008 = Timing.RunCoroutine(Infection());
-
-            PlayerEvents.Hurt += WhenHurt;
-            PlayerEvents.ChangedRole += WhenRoleChange;
+            
+            Instances.Add(this);
         }
-
-        public void OnDestroy()
+        
+        private void OnDestroy()
         {
-            PlayerEvents.Hurt -= WhenHurt;
-            PlayerEvents.ChangedRole -= WhenRoleChange;
             _ply = null;
             Timing.KillCoroutines(_ahp);
             Timing.KillCoroutines(_s008);
+
+            Instances.Remove(this);
         }
 
         public void WhenHurt(PlayerHurtEventArgs ev)

@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using PlayerRoles;
 
 namespace SCP008X.Patches
@@ -8,8 +10,15 @@ namespace SCP008X.Patches
     {
         private static RoleTypeId Scp008 => (RoleTypeId)64;
 
-        [HarmonyPatch(typeof(NineTailedFoxAnnouncer), nameof(NineTailedFoxAnnouncer.ConvertSCP),
-            typeof(RoleTypeId), typeof(string), typeof(string))]
+        [HarmonyTargetMethod]
+        public static MethodBase GetMethodBase()
+        {
+            return typeof(NineTailedFoxAnnouncer)
+                .GetMethods()
+                .First(x => x.Name == nameof(NineTailedFoxAnnouncer.ConvertSCP) &&
+                            x.GetParameters().Any(y => y.ParameterType == typeof(RoleTypeId)));
+        }
+
         [HarmonyPrefix]
         public static bool OverrideResult(RoleTypeId role, ref string withoutSpace, ref string withSpace)
         {
