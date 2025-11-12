@@ -235,20 +235,28 @@ namespace SCP008X
 
         private static void OnPlayerDied(PlayerDeathEventArgs ev)
         {
-            if (ev.Player.Role == RoleTypeId.Scp0492)
+            if (ev.OldRole == RoleTypeId.Scp0492)
             {
                 Scp008Handler.ClearScp008(ev.Player);
                 Logger.Debug($"Called ClearSCP008() method for {ev.Player.LogName}.", Config.DebugMode);
             }
-
-            if (ev.Player.GameObject.TryGetComponent(out Scp008 _))
+            else if (ev.Player.GameObject.TryGetComponent(out Scp008 _))
             {
                 ev.Player.SetRole(RoleTypeId.Scp0492, RoleChangeReason.Resurrected);
             }
 
-            if (ev.Player.Role == RoleTypeId.Scp049 || ev.Player.Role == RoleTypeId.Scp0492)
+            if (Config.AoeInfection && ev.Player.Role == RoleTypeId.Scp0492)
             {
-                Scp008Handler.Victims--;
+                Scp008Handler.AoeInfection(ev.Player);
+            }
+
+            if (ev.OldRole != RoleTypeId.Scp049 && ev.OldRole != RoleTypeId.Scp0492)
+            {
+                return;
+            }
+
+            Timing.CallDelayed(.1f, () =>
+            {
                 if (Scp008Handler.Scp008Check())
                 {
                     Logger.Debug("SCP008Check() passed. Announcing recontainment...", Config.DebugMode);
@@ -269,12 +277,7 @@ namespace SCP008X
                         });
                     }
                 }
-            }
-
-            if (Config.AoeInfection && ev.Player.Role == RoleTypeId.Scp0492)
-            {
-                Scp008Handler.AoeInfection(ev.Player);
-            }
+            });
         }
 
         private static void PickedUpItem(PlayerPickedUpItemEventArgs ev)
