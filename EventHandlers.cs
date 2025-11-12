@@ -282,7 +282,7 @@ namespace SCP008X
 
         private static void PickedUpItem(PlayerPickedUpItemEventArgs ev)
         {
-            if (Scp008ItemIds.Contains(ev.Item.Serial))
+            if (!Scp008ItemIds.Contains(ev.Item.Serial))
             {
                 return;
             }
