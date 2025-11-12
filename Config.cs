@@ -11,7 +11,7 @@ namespace SCP008X
         public bool SummaryStats { get; set; }
 
         [Description("The chance of a player being infected when hit by a zombie.")]
-        public int InfectionChance { get; set; } = 100;
+        public int InfectionChance { get; set; } = 25;
 
         [Description("The chance a player cures themselves when using a medkit.")]
         public int CureChance { get; set; } = 50;
@@ -32,7 +32,7 @@ namespace SCP008X
         public int ZombieHealth { get; set; } = 320;
 
         [Description("How much AHP should be given to Zombies?")]
-        public int Scp008Buff { get; set; } = 25;
+        public int Scp008Buff { get; set; } = 10;
 
         [Description(
             "Maximum AHP that a zombie can get by damaging other players. This is on top of HS they can get from 049.")]
@@ -49,6 +49,7 @@ namespace SCP008X
             "SCP-008 containment breach detected. " +
             "All remaining personnel are advised to proceed with standard evacuation protocols until an MTF squad reaches your destination.";
 
+        [Description("Damage done by zombies when they hit another player")]
         public int ZombieDamage { get; set; } = 24;
 
         [Description("This is the text that will be displayed to SCP-049-2 players on spawn")]

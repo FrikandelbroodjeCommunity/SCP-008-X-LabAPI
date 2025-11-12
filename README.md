@@ -1,40 +1,56 @@
-<a href="https://discord.gg/BvKsvS7"><img src="https://img.shields.io/discord/451599029499985920?color=%234e7bd8&label=Discord" alt="Pixel's Community"></a>
-<a href="https://github.com/DGvagabond/SCP-008-X/releases"><img src="https://img.shields.io/github/v/release/DGvagabond/SCP-008-X?include_prereleases&label=Release" alt="Releases"></a>
-<a href="https://github.com/DGvagabond/SCP-008-X/releases"><img src="https://img.shields.io/github/downloads/DGvagabond/SCP-008-X/total?label=Downloads" alt="Downloads"></a>
-<a href="https://discord.gg/PyUkWTg"><img src="https://img.shields.io/discord/656673194693885975?color=%23aa0000&label=EXILED" alt="Support"></a>
-<a href="https://github.com/DGvagabond/SCP-008-X"><img src="https://img.shields.io/github/license/DGvagabond/SCP-008-X?color=lightgrey&label=License" alt="License"></a>
-# SCP-008-X
-An EXILED 2.x plugin for SCP:SL that adds SCP-008 into the game. This is fundamentally for server hosts that want to add more a enganging SCP-049-2 experience for their players.
-## How does it work?
-It will give **SCP-049-2** the ability to infect it's targets on hit. The targets will receive a custom component that drains their health over time. In order to cure the infection, you must either use `SCP-500` for a guaranteed success or gamble with a `Medkit`'s 50% chance cure rate. Players that die while infected will spawn as SCP-049-2 as well.
-# Config Options
-| Name | Type | Description | Default |
-| --- | --- | --- | --- |
-| is_enabled | bool | Toggles the plugin | true |
-| debug_mode | bool | Toggles debug messages to your console | false |
-| summary_stats | bool | Toggles round summary stats | false |
-| infection_chance | int | Percentage chance of infection | 25% |
-| cure_chance | int | Percentage chance of being cured when using a medkit | 50% |
-| aoe_infection | bool | Toggles infecting players near killed zombies | false |
-| aoe_turned | bool | Toggles infecting players near recently turned zombies | false |
-| aoe_chance | int | Percentage chance of players near recently turned zombies being infected | 50% |
-| buff_doctor | bool | Enable instant revives for SCP-049 | false |
-| zombie_health | int | Amount of health infected zombies spawn with | 300 |
-| scp008_buff | int | Amount of AHP zombies spawn with and gain on each hit | 10 |
-| max_ahp | int | Maximum amount of AHP zombies can reach | 100 |
-| cassie_announcement | bool | Toggles the announcement when the round starts | true |
-| announcement | string | Sets the CASSIE announcement when the round starts | SCP 0 0 8 containment breach detected . Allremaining |
-| zombie_damage | int | Set how much damage SCP-049-2 deals on hit | 24 |
-| suicide_broadcast | string | Text that is displayed to all instances of SCP-049-2 | `null` |
-| infection_alert | string | A hint that is displayed to players after they're infected | `null` |
-| spawn_hint | string | A hint that's displayed to SCP-049-2 on spawn | `null` |
-| retain_inventory| bool | Allow players to keep their inventory as zombies. Items can NOT be used by them, this is purely for loot. | true |
+[![GitHub release](https://flat.badgen.net/github/release/FrikandelbroodjeCommunity/SCP-008-X-LabAPI/)](https://github.com/FrikandelbroodjeCommunity/SCP-008-X-LabAPI/releases/latest)
+[![LabAPI Version](https://flat.badgen.net/static/LabAPI%20Version/v1.1.4)](https://github.com/northwood-studios/LabAPI)
+[![Original](https://flat.badgen.net/static/Original/DGvagabond?icon=github)](https://github.com/DGvagabond/SCP-008-X)
+[![License](https://flat.badgen.net/github/license/FrikandelbroodjeCommunity/SCP-008-X-LabAPI/)](https://github.com/FrikandelbroodjeCommunity/SCP-008-X-LabAPI/blob/master/LICENSE)
+
+# About SCP-008-X
+
+A LabAPI plugin for SCP:SL that adds SCP-008 into the game.
+
+It will give zombies the ability to infect players when hitting them. Whe infected you will slowly drain your HP. The
+virus will not actually kill you, keeping you at 1 HP. If you die while infected, you will become a zombie.
+
+A player is able to cure the infection by using `SCP-500`. A `Medkit` will also have a chance of curing the infection,
+by default this is set to `50%`.
+
+If no `SCP-049` has spawned, one of the items in the map will become an infected item. When a player picks up this
+infected item, they will become infected themselves, after which the item is no longer infected. This way there can be
+an SCP-008 outbreak, even if there is no `SCP-049`. (Can be disabled in the config)
+
+# Installation
+
+Install the [latest release](https://github.com/FrikandelbroodjeCommunity/SCP-008-X-LabAPI/releases/latest) of the
+SCP-008-X plugin and place it in your LabAPI plugin folder.
 
 # Commands
-| Name | Arguments | Description |
-| --- | --- | --- |
-| infect | player | Infect `player` with SCP-008 |
-| cure | player | Cure `player` of SCP-008 |
 
-This plugin is still under development and I plan to add whatever is in high demand from the plugin's users, so feel free to submit your ideas!
-If something is not working as intended or outright broken, please submit an issue ticket and I'll look into it as soon as possible!
+| Command  | Usage             | Required permission | Description                   |
+|----------|-------------------|---------------------|-------------------------------|
+| `infect` | `infect <player>` | `scp008.infect`     | Infects `player` with SCP-008 |
+| `cure`   | `cure <player>`   | `scp008.infect`     | Cures `player` of SCP-008     |
+
+# Config
+
+| Name                     | Default | Description                                                                                               |
+|--------------------------|---------|-----------------------------------------------------------------------------------------------------------|
+| `debug_mode`             | `false` | Toggles debug messages to your console.0                                                                  |
+| `summary_stats`          | `false` | Toggles round summary stats.                                                                              |
+| `infection_chance`       | `25%`   | Percentage chance of infection.                                                                           |
+| `cure_chance`            | `50%`   | Percentage chance of being cured when using a medkit.                                                     |
+| `aoe_infection`          | `false` | Toggles infecting players near killed zombies.                                                            |
+| `aoe_turned`             | `false` | Toggles infecting players near recently turned zombies.                                                   |
+| `aoe_chance`             | `50%`   | Percentage chance of players near recently turned zombies being infected.                                 |
+| `buff_doctor`            | `false` | Enable instant revives for SCP-049.                                                                       |
+| `zombie_health`          | `320`   | Amount of health zombies spawn with.                                                                      |
+| `scp008_buff`            | `10`    | Amount of AHP zombies spawn with and gain on each hit.                                                    |
+| `max_ahp`                | `50`    | Maximum amount of AHP zombies can reach. This is on top of the HS they can get from SCP-049.              |
+| `cassie_announcement`    | `true`  | Toggles the announcement when the round starts.                                                           |
+| `announcement`           | ...     | Sets the CASSIE announcement when the round starts.                                                       |
+| `announcement_subtitles` | ...     | Subtitles that the players will see when CASSIE announces the message.                                    |
+| `zombie_damage`          | `24`    | Set how much damage SCP-049-2 deals on hit.                                                               |
+| `suicide_broadcast`      | `null`  | Text that is displayed to all instances of SCP-049-2.                                                     |
+| `infection_alert`        | `null`  | A hint that is displayed to players after they're infected.                                               |
+| `spawn_hint`             | `null`  | A hint that's displayed to SCP-049-2 on spawn.                                                            |
+| `retain_inventory`       | `true`  | Allow players to keep their inventory as zombies. Items can NOT be used by them, this is purely for loot. |
+| `infected_items`         | `1`     | The amount of infected items that spawn in the map if there is no SCP-049. Set to 0 to disable.           |
+| `infected_hint`          | ...     | Hint shown when picking up an infected item. Can be different from the `infection_alert`.                 |
