@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
+using Cassie;
 using HarmonyLib;
 using PlayerRoles;
 
@@ -13,9 +14,9 @@ namespace SCP008X.Patches
         [HarmonyTargetMethod]
         public static MethodBase GetMethodBase()
         {
-            return typeof(NineTailedFoxAnnouncer)
+            return typeof(CassieScpTerminationAnnouncement)
                 .GetMethods()
-                .First(x => x.Name == nameof(NineTailedFoxAnnouncer.ConvertSCP) &&
+                .First(x => x.Name == nameof(CassieScpTerminationAnnouncement.ConvertSCP) &&
                             x.GetParameters().Any(y => y.ParameterType == typeof(RoleTypeId)));
         }
 
