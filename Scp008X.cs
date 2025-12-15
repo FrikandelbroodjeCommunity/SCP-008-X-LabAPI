@@ -10,7 +10,7 @@ namespace SCP008X
         public override string Name => "Scp008X";
         public override string Description => "Adds SCP-008 into the game";
         public override string Author => "DGvagabond";
-        public override Version Version => new Version(1, 0, 0);
+        public override Version Version => new Version(1, 0, 1);
         public override Version RequiredApiVersion => new Version(LabApiProperties.CompiledVersion);
 
         public static Scp008X Singleton;
