@@ -65,11 +65,12 @@ namespace SCP008X
                 {
                     if (string.IsNullOrEmpty(Config.AnnouncementSubtitles))
                     {
-                        Cassie.Message(Config.Announcement);
+                        LabApi.Features.Wrappers.Cassie.Message(Config.Announcement);
                     }
                     else
                     {
-                        Cassie.Message(Config.Announcement, customSubtitles: Config.AnnouncementSubtitles);
+                        LabApi.Features.Wrappers.Cassie.Message(Config.Announcement,
+                            customSubtitles: Config.AnnouncementSubtitles);
                     }
 
                     Scp008ItemIds.Clear();
@@ -249,35 +250,6 @@ namespace SCP008X
             {
                 Scp008Handler.AoeInfection(ev.Player);
             }
-
-            if (ev.OldRole != RoleTypeId.Scp049 && ev.OldRole != RoleTypeId.Scp0492)
-            {
-                return;
-            }
-
-            Timing.CallDelayed(.1f, () =>
-            {
-                if (Scp008Handler.Scp008Check())
-                {
-                    Logger.Debug("SCP008Check() passed. Announcing recontainment...", Config.DebugMode);
-
-                    try
-                    {
-                        var announcement = NineTailedFoxAnnouncer.scpDeaths
-                            .First(x => x.announcement == ev.DamageHandler.CassieDeathAnnouncement.Announcement);
-                        announcement.scpSubjects.Add((RoleTypeId)64);
-                    }
-                    catch
-                    {
-                        NineTailedFoxAnnouncer.scpDeaths.Add(new NineTailedFoxAnnouncer.ScpDeath
-                        {
-                            scpSubjects = new List<RoleTypeId> { (RoleTypeId)64 },
-                            announcement = ev.DamageHandler.CassieDeathAnnouncement.Announcement,
-                            subtitleParts = ev.DamageHandler.CassieDeathAnnouncement.SubtitleParts
-                        });
-                    }
-                }
-            });
         }
 
         private static void PickedUpItem(PlayerPickedUpItemEventArgs ev)
